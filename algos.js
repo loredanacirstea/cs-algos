@@ -1,6 +1,3 @@
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
-
 // Definition for singly-linked list.
 //      function Node(data){
 //        this.data = data
@@ -100,11 +97,13 @@ function singleNumber(arr){
 == Given two identical DOM tree structures, A and B, and a node from A, find the corresponding node in B.
 */
 
-let dom1 = new JSDOM(`<!DOCTYPE html><div><div><p>Hello</p></div><div><p>Hello</p><div><p id=thisp>Hello</p></div></div></div>`);
-let dom2 = new JSDOM(`<!DOCTYPE html><div><div><p>Hello</p></div><div><p>Hello</p><div><p id=thisp>Hello</p></div></div></div>`);
+//const jsdom = require("jsdom");
+//const { JSDOM } = jsdom;
+//let dom1 = new JSDOM(`<!DOCTYPE html><div><div><p>Hello</p></div><div><p>Hello</p><div><p id=thisp>Hello</p></div></div></div>`);
+//let dom2 = new JSDOM(`<!DOCTYPE html><div><div><p>Hello</p></div><div><p>Hello</p><div><p id=thisp>Hello</p></div></div></div>`);
 
-let doc1 = dom1.window.document;
-let doc2 = dom2.window.document;
+//let doc1 = dom1.window.document;
+//let doc2 = dom2.window.document;
 
 
 function findNode(node, tree1, tree2) {
@@ -940,34 +939,90 @@ let jobs = [
 
 // Emitter pattern
 
-class Subscription {
-  constructer() {
-
-  }
-
-  unsubscribe() {
-
-  }
-
-}
-
 class Emitter {
-  constructer() {
-
+  constructor() {
+    this.subscriptions = {}
   }
 
-  subscribe(ev, callb) {
+  subscribe() {
+  	let self = this;
+  	let name = arguments[0];
+    let args = Array.prototype.slice.call(arguments, 1);
 
-    return subscription;
+  	if(!this.subscriptions[name])
+    	this.subscriptions[name] = [];
+    this.subscriptions[name].push(args);
+    let index = this.subscriptions[name].length - 1;
+    console.log('index', index)
+
+    return {
+    	unsubscribe: function() {
+      	self.subscriptions[name].splice(index, 1);
+      }
+    };
   }
 
-  publish(ev, callb) {
-
+  publish(name, callback) {
+  	let self = this;
+    setInterval(function() {
+    	self.subscriptions[name].forEach(function(args) {
+      	callback.apply(null, args);
+      });
+    }, 7000);
   }
 }
 
-
+/*
 let emitter = new Emitter();
-let subscription = emiter.subscribe('custom-event', callback);
-emiter.publish('custom-event', args1, args2);
+let subscription = emitter.subscribe('custom-event', 2, 3, 4);
+emitter.publish('custom-event', function() {
+	let args = Array.prototype.slice.call(arguments, 0);
+	console.log('publishing custom-event', args);
+  return args.reduce(function(a,b){ return a+b; });
+});
+subscription.unsubscribe();*/
+
+class Emitter2 {
+	constructor() {
+  	this.subscriptions = {}
+  }
+
+  subscribe(name, callback) {
+  	let self = this;
+  	if(!this.subscriptions[name])
+    	this.subscriptions[name] = []
+    this.subscriptions[name].push(callback);
+    let index = this.subscriptions[name].length - 1;
+
+    return {
+    	unsubscribe: function() {
+      	self.subscriptions[name].splice(index, 1);
+      }
+    }
+  }
+
+  publish() {
+  	let name = arguments[0]
+    let args = Array.prototype.slice.call(arguments, 1)
+  	this.subscriptions[name].forEach(function(callb) {
+    	callb(args);
+    });
+  }
+}
+
+/*
+let emitter = new Emitter2();
+let subscription = emitter.subscribe('custom-event', function(data) {
+	console.log('subscription callback custom-event', data);
+});
+let subscription2 = emitter.subscribe('custom-event', function(data) {
+	console.log('subscription2 callback custom-event', data);
+});
+let subscription3 = emitter.subscribe('custom-event', function(data) {
+	console.log('subscription3 callback custom-event', data);
+});
+emitter.publish('custom-event', 1,2,3);
 subscription.unsubscribe();
+emitter.publish('custom-event', 4,5);
+*/
+
