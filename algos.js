@@ -1026,3 +1026,15 @@ subscription.unsubscribe();
 emitter.publish('custom-event', 4,5);
 */
 
+
+function flatten(arr) {
+	if(!arr)
+  	return [];
+  if(!(arr instanceof Array))
+  	return [arr];
+  if(!arr.length)
+  	return [];
+  return flatten(arr[0]).concat(flatten(arr.slice(1)));
+}
+
+//console.log(flatten([1, 2, {a:[3,4]}, [5, [6], [[7]]]]));
